@@ -1,0 +1,17 @@
+# env
+.env
+
+# files created by mfman
+output/
+mfman.log
+
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+
+# Virtual environments
+.venv
