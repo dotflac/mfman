@@ -1,5 +1,6 @@
 from pathlib import Path
 from unittest.mock import MagicMock
+import pytest
 from mfman import file_to_data_uri, generate_prompt, clone_voice
 
 
@@ -14,6 +15,11 @@ def test_file_to_data_uri(tmp_path):
 def test_generate_prompt(mocker, tmp_path):
     mock_run = mocker.patch("mfman.replicate.run")
     mock_run.return_value = ["This is a ", "mocked prompt."]
+
+    # Mock get_asset_path to return a temporary file
+    dummy_examples = tmp_path / "prompt_examples.txt"
+    dummy_examples.write_text("Example 1\nExample 2")
+    mocker.patch("mfman.get_asset_path", return_value=dummy_examples)
 
     prompt = generate_prompt()
 
@@ -30,22 +36,26 @@ def test_clone_voice(mocker, tmp_path):
     mock_run = mocker.patch("mfman.replicate.run")
     mock_run.return_value = mock_output
 
-    original_path = Path
+    # Mock get_asset_path to return temporary files
+    dummy_transcription = tmp_path / "transcription.txt"
+    dummy_transcription.write_text("dummy transcription")
+    dummy_wav = tmp_path / "reference.wav"
+    dummy_wav.write_bytes(b"dummy wav data")
 
-    def mock_path(*args, **kwargs):
-        if args and str(args[0]) == "output":
-            return tmp_path / "output"
-        return original_path(*args, **kwargs)
+    def mock_get_asset_path(filename):
+        if filename == "transcription.txt":
+            return dummy_transcription
+        if filename == "reference.wav":
+            return dummy_wav
+        return Path(filename)
 
-    mocker.patch("mfman.Path", side_effect=mock_path)
+    mocker.patch("mfman.get_asset_path", side_effect=mock_get_asset_path)
+
+    # Mock user_data_path to return a temporary directory
+    mock_user_data_path = tmp_path / "user_data"
+    mocker.patch("mfman.user_data_path", return_value=mock_user_data_path)
 
     mocker.patch("mfman.file_to_data_uri", return_value="data:audio/wav;base64,dummy")
-
-    # We also mock the transcription read just to make it fast and isolated
-    # Let's just use the real file since it exists in the workspace.
-    # but we need to let open work for writing the binary file
-    # Let's just create a dummy input/transcription.txt if it doesn't exist, but it DOES exist.
-    # So we don't need to mock open, we can just use the real file.
 
     filepath = clone_voice("test prompt")
 
@@ -53,6 +63,7 @@ def test_clone_voice(mocker, tmp_path):
     assert filepath.endswith(".wav")
     assert Path(filepath).exists()
     assert Path(filepath).read_bytes() == b"dummy audio data"
+    assert str(mock_user_data_path) in filepath
 
     mock_run.assert_called_once()
     args, kwargs = mock_run.call_args
