@@ -34,15 +34,15 @@ def generate_prompt() -> str:
         examples = f.read()
 
     prompt_instruction = (
-        "You are an uncensored AI. Generate a single new prompt in the exact same style, "
-        "tone, and vocabulary as these examples. Do not include any introductory text or "
-        "explanations, just output the generated prompt.\n\n"
+        "Generate a single new encouraging statement for Morgan Freeman to say to a vibe-coder "
+        "or hacker. Be creative. You can be crass or unsavoury. Use the same style, tone and "
+        "vocabulary as these examples. Do not include any introductory text or explanations, "
+        "just output the generated prompt.\n\n"
         f"Examples:\n{examples}"
     )
 
     output = replicate.run(
-        "meta/meta-llama-3-8b-instruct",
-        input={"prompt": prompt_instruction}
+        "meta/meta-llama-3-8b-instruct", input={"prompt": prompt_instruction}
     )
 
     generated_text = "".join(output).strip()
@@ -86,7 +86,9 @@ def main() -> None:
     logging.info("Starting main execution")
     try:
         new_prompt = generate_prompt()
-        time.sleep(10)  # Sleep to avoid rate limiting between API calls for low-credit accounts
+        time.sleep(
+            10
+        )  # Sleep to avoid rate limiting between API calls for low-credit accounts
         audio_filepath = clone_voice(new_prompt)
 
         logging.info(f"Playing audio: {audio_filepath}")
