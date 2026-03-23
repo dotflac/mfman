@@ -1,0 +1,20 @@
+# mfman Configuration Example
+# Copy this to ~/.config/mfman/config.toml (on Linux) to customize settings.
+
+# The Replicate model used for generating encouragement prompts.
+# prompt_model = "meta/meta-llama-3-8b-instruct"
+
+# The Replicate model used for voice cloning and text-to-speech.
+# tts_model = "qwen/qwen3-tts"
+
+# The command used to play the generated audio file.
+# playback_command = ["mpv"]
+
+# The time in seconds to wait between prompt generation and voice cloning
+# to avoid rate limiting on some accounts.
+# sleep_interval = 10
+
+# Asset Overrides:
+# To override default assets like 'prompt_examples.txt' or 'reference.wav',
+# create an 'assets' folder in your config directory (~/.config/mfman/assets/)
+# and place the modified files there.
